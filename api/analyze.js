@@ -38,24 +38,24 @@ ${reviews ? `\nРћРўР—Р«Р’Р«:\n${reviews}` : ''}
 РћС‚РІРµС‡Р°Р№ С‚РѕР»СЊРєРѕ РїРѕ С„РѕСЂРјР°С‚Сѓ РІС‹С€Рµ. Р‘РµР· РІРІРѕРґРЅС‹С… С„СЂР°Р·.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2500,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 2500, temperature: 0.7 },
+        }),
+      }
+    );
 
     const data = await response.json();
     if (!response.ok) return res.status(500).json({ error: data.error?.message || 'API error' });
 
-    const text = data.content.map(b => b.text || '').join('');
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!text) return res.status(500).json({ error: 'РџСѓСЃС‚РѕР№ РѕС‚РІРµС‚ РѕС‚ Gemini' });
+
     return res.status(200).json({ result: text });
   } catch (e) {
     return res.status(500).json({ error: e.message });
