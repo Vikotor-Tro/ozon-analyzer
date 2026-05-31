@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Карточный Аналитик</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geologica:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e11;
+    --surface: #14161b;
+    --surface2: #1c1f27;
+    --border: #2a2e3a;
+    --accent: #e8ff47;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Geologica', sans-serif; font-weight: 300; min-height: 100vh; }
+  header { padding: 36px 48px 8px; animation: fadeDown 0.5s ease both; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 5vw, 60px); letter-spacing: 2px; line-height: 1; display: flex; align-items: flex-end; gap: 12px; }
+  .logo-badge { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; }
+  .tagline { font-size: 13px; color: var(--muted); padding: 8px 48px 36px; animation: fadeDown 0.5s 0.1s ease both; }
+  .container { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 0 2px 2px; min-height: calc(100vh - 130px); animation: fadeUp 0.6s 0.15s ease both; }
+  @media (max-width: 860px) { .container { grid-template-columns: 1fr; } header, .tagline { padding-left: 20px; padding-right: 20px; } }
+  .panel { background: var(--surface); padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+  .panel-left { border-right: 1px solid var(--border); }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+  textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'Geologica', sans-serif; font-size: 14px; font-weight: 300; line-height: 1.6; padding: 14px 16px; transition: border-color 0.2s, box-shadow 0.2s; resize: none; width: 100%; outline: none; }
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,255,71,0.07); }
+  textarea::placeholder { color: #383c4a; }
+  .card-input { height: 220px; }
+  .reviews-input { height: 140px; }
+  .btn { background: var(--accent); border: none; border-radius: var(--radius); color: #000; cursor: pointer; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; padding: 18px; transition: transform 0.15s, box-shadow 0.15s; width: 100%; margin-top: auto; }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,255,71,0.2); }
+  .btn:active { transform: none; }
+  .btn:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+  .panel-right { position: relative; }
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 400px; gap: 12px; color: var(--muted); text-align: center; }
+  .empty-icon { font-size: 48px; opacity: 0.25; }
+  .empty-state p { font-size: 14px; max-width: 200px; line-height: 1.6; }
+  .loading { display: none; position: absolute; inset: 0; background: var(--surface); flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+  .loading.on { display: flex; }
+  .bars { display: flex; gap: 5px; align-items: flex-end; height: 36px; }
+  .bar { width: 5px; background: var(--accent); border-radius: 3px; animation: bounce 1s ease-in-out infinite; }
+  .bar:nth-child(2) { animation-delay:.15s; opacity:.7; }
+  .bar:nth-child(3) { animation-delay:.3s; }
+  .bar:nth-child(4) { animation-delay:.45s; opacity:.7; }
+  .bar:nth-child(5) { animation-delay:.6s; }
+  .loading-label { font-size: 13px; color: var(--muted); }
+  .loading-step { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .result { display: none; flex-direction: column; gap: 14px; height: 100%; }
+  .result.on { display: flex; }
+  .result-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .score-pill { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; }
+  .score-high { background: rgba(232,255,71,0.12); color: var(--accent); }
+  .score-med  { background: rgba(255,165,0,0.12);  color: #ffa500; }
+  .score-low  { background: rgba(239,68,68,0.12);  color: #f87171; }
+  .actions { display: flex; gap: 8px; }
+  .btn-sm { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; font-family: 'Geologica', sans-serif; font-size: 12px; font-weight: 500; padding: 6px 12px; transition: all 0.2s; }
+  .btn-sm:hover { color: var(--text); border-color: var(--accent); }
+  .sections { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; padding-right: 2px; }
+  .sections::-webkit-scrollbar { width: 3px; }
+  .sections::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .sec { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; animation: fadeUp 0.35s ease both; }
+  .sec-head { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; user-select: none; }
+  .sec-head:hover { background: rgba(255,255,255,0.02); }
+  .sec-icon { font-size: 15px; }
+  .sec-title { font-size: 13px; font-weight: 500; flex: 1; }
+  .sec-chevron { color: var(--muted); font-size: 11px; transition: transform 0.2s; }
+  .sec.open .sec-chevron { transform: rotate(180deg); }
+  .sec-body { border-top: 1px solid var(--border); padding: 14px 16px; font-size: 13.5px; line-height: 1.75; color: #bcc0cc; display: none; white-space: pre-wrap; }
+  .sec.open .sec-body { display: block; }
+  .error { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius); color: #f87171; font-size: 13px; line-height: 1.6; padding: 12px 16px; display: none; margin-top: -8px; }
+  .error.on { display: block; }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:none; } }
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(14px);  } to { opacity:1; transform:none; } }
+  @keyframes bounce   { 0%,100% { height:8px; } 50% { height:32px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Карточный Аналитик <span class="logo-badge">AI</span></div>
+</header>
+<div class="tagline">Вставь текст карточки — получи полный разбор за 15 секунд</div>
+<div class="container">
+  <div class="panel panel-left">
+    <div class="field">
+      <label>Текст карточки товара</label>
+      <textarea id="card" class="card-input" placeholder="Вставь сюда всё что есть на странице товара — заголовок, описание, характеристики."></textarea>
+    </div>
+    <div class="field">
+      <label>Отзывы покупателей <span style="color:#3d4150;font-weight:400;text-transform:none">— необязательно</span></label>
+      <textarea id="reviews" class="reviews-input" placeholder="Каждый отзыв с новой строки…"></textarea>
+    </div>
+    <div id="err" class="error"></div>
+    <button class="btn" id="btn" onclick="run()">Анализировать</button>
+  </div>
+  <div class="panel panel-right">
+    <div class="empty-state" id="empty">
+      <div class="empty-icon">🔍</div>
+      <p>Заполни данные и нажми «Анализировать»</p>
+    </div>
+    <div class="loading" id="loading">
+      <div class="bars">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div>
+      </div>
+      <div class="loading-label">Анализируем карточку…</div>
+      <div class="loading-step" id="step"></div>
+    </div>
+    <div class="result" id="result">
+      <div class="result-top">
+        <span class="score-pill" id="scorePill"></span>
+        <div class="actions">
+          <button class="btn-sm" onclick="copy()">📋 Копировать</button>
+          <button class="btn-sm" onclick="download()">⬇ .md</button>
+        </div>
+      </div>
+      <div class="sections" id="sections"></div>
+    </div>
+  </div>
+</div>
+<script>
+let raw = '';
+
+const STEPS = ['Читаю карточку…','Ищу SEO-пробелы…','Анализирую отзывы…','Генерирую рекомендации…'];
+let si = 0, st = null;
+function startSteps() {
+  si = 0; document.getElementById('step').textContent = STEPS[0];
+  st = setInterval(() => { si = (si+1)%STEPS.length; document.getElementById('step').textContent = STEPS[si]; }, 2400);
+}
+function stopSteps() { clearInterval(st); }
+
+// Все возможные варианты ключей которые может вернуть YandexGPT
+const SECTION_MAP = {
+  'SEO_SCORE':           { icon:'📊', title:'SEO-оценка',         open:true,  score:true },
+  'SEO_ANALIS':          { icon:'🔎', title:'SEO-анализ',          open:true  },
+  'SEO_АНАЛИЗ':          { icon:'🔎', title:'SEO-анализ',          open:true  },
+  'NOVYE_ZAGOLOVKI':     { icon:'✏️', title:'Новые заголовки',     open:true  },
+  'НОВЫЕ_ЗАГОЛОВКИ':     { icon:'✏️', title:'Новые заголовки',     open:true  },
+  'ULUCHSHENNOE_OPISANIE':{ icon:'📝', title:'Улучшенное описание', open:false },
+  'УЛУЧШЕННОЕ_ОПИСАНИЕ': { icon:'📝', title:'Улучшенное описание', open:false },
+  'CTR_GIPOTEZY':        { icon:'⚡', title:'Гипотезы для CTR',    open:false },
+  'CTR_ГИПОТЕЗЫ':        { icon:'⚡', title:'Гипотезы для CTR',    open:false },
+  'INFOGRAFIKA':         { icon:'🖼', title:'Идеи инфографики',    open:false },
+  'ИНФОГРАФИКА':         { icon:'🖼', title:'Идеи инфографики',    open:false },
+  'ANALIZ_OTZYVOV':      { icon:'💬', title:'Анализ отзывов',      open:false },
+  'АНАЛИЗ_ОТЗЫВОВ':      { icon:'💬', title:'Анализ отзывов',      open:false },
+};
+
+// Порядок отображения
+const DISPLAY_ORDER = ['SEO_SCORE','SEO_ANALIS','SEO_АНАЛИЗ','NOVYE_ZAGOLOVKI','НОВЫЕ_ЗАГОЛОВКИ','ULUCHSHENNOE_OPISANIE','УЛУЧШЕННОЕ_ОПИСАНИЕ','CTR_GIPOTEZY','CTR_ГИПОТЕЗЫ','INFOGRAFIKA','ИНФОГРАФИКА','ANALIZ_OTZYVOV','АНАЛИЗ_ОТЗЫВОВ'];
+
+async function run() {
+  const card = document.getElementById('card').value.trim();
+  const reviews = document.getElementById('reviews').value.trim();
+  const err = document.getElementById('err');
+  err.classList.remove('on');
+  if (!card) { err.textContent = '⚠ Вставь текст карточки товара'; err.classList.add('on'); return; }
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('result').classList.remove('on');
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('btn').disabled = true;
+  startSteps();
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ card, reviews }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Ошибка сервера');
+    raw = data.result;
+    render(raw);
+  } catch(e) {
+    err.textContent = '⚠ ' + e.message;
+    err.classList.add('on');
+    document.getElementById('empty').style.display = 'flex';
+  } finally {
+    stopSteps();
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('btn').disabled = false;
+  }
+}
+
+function render(text) {
+  const parts = text.split(/^##\s*/m).filter(Boolean);
+  const parsed = {};
+  parts.forEach(p => {
+    const nl = p.indexOf('\n');
+    const k = nl > -1 ? p.slice(0,nl).trim() : p.trim();
+    const v = nl > -1 ? p.slice(nl+1).trim() : '';
+    parsed[k] = v;
+  });
+
+  // Найти SEO_SCORE в любом варианте
+  const scoreRaw = parsed['SEO_SCORE'] || parsed['SEO_score'] || '';
+  const score = parseInt(scoreRaw) || 0;
+  const pill = document.getElementById('scorePill');
+  pill.textContent = `SEO ${score}/100 · ${score>=70?'Хорошо':score>=40?'Средне':'Слабо'}`;
+  pill.className = 'score-pill ' + (score>=70?'score-high':score>=40?'score-med':'score-low');
+
+  const cont = document.getElementById('sections');
+  cont.innerHTML = '';
+
+  // Убрать дубли — если есть и русский и английский вариант, показать один
+  const shown = new Set();
+
+  DISPLAY_ORDER.forEach((key, i) => {
+    const meta = SECTION_MAP[key];
+    if (!meta || meta.score) return;
+    const body = parsed[key] || '';
+    if (!body) return;
+
+    // Нормализованное название для дедупликации
+    const titleKey = meta.title;
+    if (shown.has(titleKey)) return;
+    shown.add(titleKey);
+
+    const s = document.createElement('div');
+    s.className = 'sec' + (meta.open ? ' open' : '');
+    s.style.animationDelay = (i * 0.05) + 's';
+    s.innerHTML = `
+      <div class="sec-head" onclick="this.closest('.sec').classList.toggle('open')">
+        <span class="sec-icon">${meta.icon}</span>
+        <span class="sec-title">${meta.title}</span>
+        <span class="sec-chevron">▼</span>
+      </div>
+      <div class="sec-body">${esc(body)}</div>`;
+    cont.appendChild(s);
+  });
+
+  document.getElementById('result').classList.add('on');
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function copy() {
+  navigator.clipboard.writeText(raw).then(() => {
+    const b = document.querySelector('.btn-sm');
+    b.textContent = '✅ Скопировано';
+    setTimeout(() => b.textContent = '📋 Копировать', 2000);
+  });
+}
+
+function download() {
+  const blob = new Blob([raw], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'анализ_карточки.md';
+  a.click();
+}
+</script>
+</body>
+</html>
