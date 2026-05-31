@@ -39,22 +39,32 @@ ${reviews ? `\nРћРўР—Р«Р’Р«:\n${reviews}` : ''}
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Api-Key ${process.env.YANDEX_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 2500, temperature: 0.7 },
+          modelUri: `gpt://${process.env.YANDEX_FOLDER_ID}/yandexgpt-lite`,
+          completionOptions: {
+            stream: false,
+            temperature: 0.7,
+            maxTokens: 2500,
+          },
+          messages: [
+            { role: 'user', text: prompt }
+          ],
         }),
       }
     );
 
     const data = await response.json();
-    if (!response.ok) return res.status(500).json({ error: data.error?.message || 'API error' });
+    if (!response.ok) return res.status(500).json({ error: data.error?.message || JSON.stringify(data) });
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!text) return res.status(500).json({ error: 'РџСѓСЃС‚РѕР№ РѕС‚РІРµС‚ РѕС‚ Gemini' });
+    const text = data.result?.alternatives?.[0]?.message?.text || '';
+    if (!text) return res.status(500).json({ error: 'РџСѓСЃС‚РѕР№ РѕС‚РІРµС‚ РѕС‚ YandexGPT' });
 
     return res.status(200).json({ result: text });
   } catch (e) {
