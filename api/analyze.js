@@ -4,38 +4,44 @@ export default async function handler(req, res) {
   const { card, reviews } = req.body;
   if (!card) return res.status(400).json({ error: 'card is required' });
 
-  const prompt = `РўС‹ вЂ” СЌРєСЃРїРµСЂС‚ РїРѕ РѕРїС‚РёРјРёР·Р°С†РёРё С‚РѕРІР°СЂРЅС‹С… РєР°СЂС‚РѕС‡РµРє РЅР° РјР°СЂРєРµС‚РїР»РµР№СЃР°С… (Ozon, Wildberries). РџСЂРѕР°РЅР°Р»РёР·РёСЂСѓР№ РєР°СЂС‚РѕС‡РєСѓ Рё РґР°Р№ СЃС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РѕС‚РІРµС‚ СЃС‚СЂРѕРіРѕ РІ С„РѕСЂРјР°С‚Рµ РЅРёР¶Рµ. РљР°Р¶РґС‹Р№ СЂР°Р·РґРµР» РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃ РјР°СЂРєРµСЂР° ##.
-
-## SEO_SCORE
-РћС†РµРЅРєР° С‚РµРєСѓС‰РµРіРѕ SEO РѕС‚ 0 РґРѕ 100 (С‚РѕР»СЊРєРѕ С‡РёСЃР»Рѕ).
-
-## SEO_РђРќРђР›РР—
-3вЂ“5 РєРѕРЅРєСЂРµС‚РЅС‹С… SEO-РїСЂРѕР±Р»РµРј: РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РёРµ РєР»СЋС‡РµРІС‹Рµ СЃР»РѕРІР°, СЃР»Р°Р±С‹Р№ Р·Р°РіРѕР»РѕРІРѕРє, СѓРїСѓС‰РµРЅРЅС‹Рµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё.
-
-## РќРћР’Р«Р•_Р—РђР“РћР›РћР’РљР
-3 РІР°СЂРёР°РЅС‚Р° Р·Р°РіРѕР»РѕРІРєР°:
-1. РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё: [Р·Р°РіРѕР»РѕРІРѕРє]
-2. Р‘РѕР»СЊ РїРѕРєСѓРїР°С‚РµР»СЏ: [Р·Р°РіРѕР»РѕРІРѕРє]
-3. РЈРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ: [Р·Р°РіРѕР»РѕРІРѕРє]
-
-## РЈР›РЈР§РЁР•РќРќРћР•_РћРџРРЎРђРќРР•
-Р“РѕС‚РѕРІРѕРµ СѓР»СѓС‡С€РµРЅРЅРѕРµ РѕРїРёСЃР°РЅРёРµ вЂ” РЅР°СЃС‹С‰РµРЅРѕ РєР»СЋС‡РµРІС‹РјРё СЃР»РѕРІР°РјРё, С‡РёС‚Р°РµС‚СЃСЏ РµСЃС‚РµСЃС‚РІРµРЅРЅРѕ, 4вЂ“6 РїСЂРµРґР»РѕР¶РµРЅРёР№.
-
-## CTR_Р“РРџРћРўР•Р—Р«
-3вЂ“4 РєРѕРЅРєСЂРµС‚РЅС‹Рµ РіРёРїРѕС‚РµР·С‹ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ CTR (С„РѕС‚Рѕ, С†РµРЅР°, Р±РµР№РґР¶Рё, Р°РєС†РёРё).
-
-## РРќР¤РћР“Р РђР¤РРљРђ
-4вЂ“5 РёРґРµР№ РґР»СЏ СЃР»Р°Р№РґРѕРІ РёРЅС„РѕРіСЂР°С„РёРєРё: С‡С‚Рѕ РїРѕРєР°Р·Р°С‚СЊ Рё РєР°РєРѕР№ С‚РµР·РёСЃ РґРѕРЅРµСЃС‚Рё.
-
-## РђРќРђР›РР—_РћРўР—Р«Р’РћР’
-${reviews ? 'Р“Р»Р°РІРЅС‹Рµ РїСЂРёС‡РёРЅС‹ РЅРµРіР°С‚РёРІР°, С‡С‚Рѕ С…РІР°Р»СЏС‚ (СѓСЃРёР»РёС‚СЊ РІ РѕРїРёСЃР°РЅРёРё), СЂРµРєРѕРјРµРЅРґР°С†РёРё.' : 'РћС‚Р·С‹РІРѕРІ РЅРµС‚. РћРїРёС€Рё С‚РёРїРёС‡РЅС‹Рµ СЂРёСЃРєРё Рё РІРѕР·СЂР°Р¶РµРЅРёСЏ РїРѕРєСѓРїР°С‚РµР»РµР№ РґР»СЏ РґР°РЅРЅРѕР№ РєР°С‚РµРіРѕСЂРёРё С‚РѕРІР°СЂР°.'}
-
----
-РљРђР РўРћР§РљРђ РўРћР’РђР Рђ:
-${card}
-${reviews ? `\nРћРўР—Р«Р’Р«:\n${reviews}` : ''}
-
-РћС‚РІРµС‡Р°Р№ С‚РѕР»СЊРєРѕ РїРѕ С„РѕСЂРјР°С‚Сѓ РІС‹С€Рµ. Р‘РµР· РІРІРѕРґРЅС‹С… С„СЂР°Р·.`;
+  const prompt = [
+    'You are an expert in optimizing product listings on Russian marketplaces Ozon and Wildberries.',
+    'Analyze the product card and respond strictly in the format below. Each section starts with ##.',
+    'Write all your responses in Russian.',
+    '',
+    '## SEO_SCORE',
+    'A number from 0 to 100 rating the current SEO quality. Only the number.',
+    '',
+    '## SEO_ANALIS',
+    '3-5 specific SEO problems: missing keywords, weak title, missing characteristics.',
+    '',
+    '## NOVYE_ZAGOLOVKI',
+    '3 title variants:',
+    '1. Characteristics: [title]',
+    '2. Customer pain: [title]',
+    '3. Uniqueness: [title]',
+    '',
+    '## ULUCHSHENNOE_OPISANIE',
+    'A ready improved description - keyword-rich but reads naturally, 4-6 sentences.',
+    '',
+    '## CTR_GIPOTEZY',
+    '3-4 specific CTR improvement hypotheses (photo, price, badges, promotions).',
+    '',
+    '## INFOGRAFIKA',
+    '4-5 infographic slide ideas: what to show and what message to convey.',
+    '',
+    '## ANALIZ_OTZYVOV',
+    reviews
+      ? 'Main reasons for negative reviews, what customers praise (strengthen in description), recommendations.'
+      : 'No reviews provided. Describe typical risks and customer objections for this product category.',
+    '',
+    '---',
+    'PRODUCT CARD:',
+    card,
+    reviews ? '\nREVIEWS:\n' + reviews : '',
+    '',
+    'Respond only in the format above. No preamble.',
+  ].join('\n');
 
   try {
     const response = await fetch(
@@ -64,7 +70,7 @@ ${reviews ? `\nРћРўР—Р«Р’Р«:\n${reviews}` : ''}
     if (!response.ok) return res.status(500).json({ error: data.error?.message || JSON.stringify(data) });
 
     const text = data.result?.alternatives?.[0]?.message?.text || '';
-    if (!text) return res.status(500).json({ error: 'РџСѓСЃС‚РѕР№ РѕС‚РІРµС‚ РѕС‚ YandexGPT' });
+    if (!text) return res.status(500).json({ error: 'Empty response from YandexGPT' });
 
     return res.status(200).json({ result: text });
   } catch (e) {
